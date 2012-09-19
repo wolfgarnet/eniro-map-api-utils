@@ -39,6 +39,8 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
       }
 	}
 	
+	this
+	
 	this.drawing = true;
 	
 	this.enableDrawing = function() {
@@ -57,6 +59,33 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
 	
 	this.disableInserting = function() {
 		this.inserting = false;
+	}
+	
+	
+	this.deleting = false;
+	
+	this.enableDeleting = function() {
+		this.deleting = true;
+	}
+	
+	this.disableDeleting = function() {
+		this.deleting = false;
+	}
+	
+	this.moving = false;
+	
+	this.enableMoving = function() {
+		this.moving = true;
+	}
+	
+	this.disableMoving = function() {
+		this.moving = false;
+	}
+	
+	this.option = OptionType.APPEND;
+	
+	this.setOption = function( option ) {
+		this.option = option;
 	}
 	
 	
@@ -146,7 +175,16 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
 
         // When marker is being dragged, the polygon should be updated.
         eniro.maps.event.addListener(marker, 'drag', function (evt) {
+        	if( !so.deleting ) {
             points.setAt(markers.getAt(thisid).pointid, marker.getPosition());
+          }
+        });
+        
+        var so = this;
+        eniro.maps.event.addListener(marker, 'click', function (evt) {
+        	if( so.deleting ) {
+            deleteMarker(thisid, markers, points);
+          }
         });
         
         ddd.value = "[" + id + "]" + pos + "\n" + ddd.value;
@@ -191,7 +229,7 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
     		points.setAt( i, b );
     		
     		/* Update */
-    		ddd.value = "Updating marker @ " + i + "\n" + ddd.value;
+    		//ddd.value = "Updating marker @ " + i + "\n" + ddd.value;
     		updateMarkers( markers, i-1, i );
     		
     	}
@@ -208,9 +246,19 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
         
         var thisid = markers.getLength();
 
+				var so = this;
         // When marker is being dragged, the polygon should be updated.
         eniro.maps.event.addListener(marker, 'drag', function (evt) {
+        	if( !so.deleting ) {
             points.setAt(markers.getAt(thisid).pointid, marker.getPosition());
+          }
+        });
+        
+        
+        eniro.maps.event.addListener(marker, 'click', function (evt) {
+        	if( so.deleting ) {
+            deleteMarker(thisid, markers, points);
+          }
         });
         
         var infoWindow = new eniro.maps.InfoWindow();
@@ -301,12 +349,18 @@ function distance( p1, p2 ) {
 function updateMarkers( markers, before, now ) {
 	for( var i = 0 ; i < markers.getLength() ; i++ ) {
 		if( markers.getAt( i ).pointid == before ) {
-			var ddd = document.getElementById( "text" );
-    	ddd.value = "MARKER(" + i + ") UPDATE before " + before + ", now: " + now + "\n" + ddd.value;
+			//var ddd = document.getElementById( "text" );
+    	//ddd.value = "MARKER(" + i + ") UPDATE before " + before + ", now: " + now + "\n" + ddd.value;
 			markers.getAt( i ).pointid = now;
 			break;
 		}
 	}
+}
+
+function deleteMarker( markerId, markers, points ) {
+	var marker = markers.removeAt( markerId );
+	points.removeAt( marker.pointid );
+	marker.setVisible( false );
 }
 
 /**
@@ -318,22 +372,51 @@ function updateMarkers( markers, before, now ) {
  *  Returns
  */
 function smallestSlope( n, p, p1, p2 ) {
-	var s1 = slope( n, p1 ); // Slope 
-	var s2 = slope( n, p2 );
+	var s1_1 = slope( p1, n ); // Slope 
+	var s1_2 = slope( p1, p ); // Slope 
+	
+	var s2_1 = slope( p2, n ); // Slope 
+	var s2_2 = slope( p2, p ); // Slope 
 	var sn = slope( n, p );
 	
-	var a1 = angleTwoLines( sn, s1 );
-	var a2 = angleTwoLines( sn, s2 );
+	//var a1 = angleTwoLines( s1_1, s1_2 );
+	//var a2 = angleTwoLines( s2_1, s2_2 );
+	
+	var a1 = angleTwoLines( s1_1, s1_2 );
+	var a2 = angleTwoLines( s2_1, s2_2 );
+	
+	if( ( n.getLat() > p.getLat() ) ) {
+	}
 	
   var ddd = document.getElementById( "text" );
   ddd.value = "Angle 1: " + a1 + ", Angle 2: " + a2 + "\n" + ddd.value;
 	
+	if( a1 < 0 && a2 < 0 ) {
+		if( a1 > a2 ) {
+			return 1;
+		} else {
+			return 2;
+		}
+	} else if( a1 < 0 && a2 >= 0 ) {
+		return 2;
+	} else if( a1 >= 0 && a2 < 0 ) {
+		return 1;
+	} else {
+		if( a1 < a2 ) {
+			return 1;
+		} else {
+			return 2;
+		}
+	}
+	
 	//alert( "a1: " + a1 + ", a2: " + a2 );
+	/*
 	if( Math.abs( a1 ) < Math.abs( a2 ) ) {
 		return 1;
 	} else {
 		return 2;
 	}
+	*/
 }
 
 function slope( p1, p2 ) {
@@ -344,3 +427,10 @@ function angleTwoLines( m1, m2 ) {
 	return (m1-m2) / (1+m1*m2);
 }
 	
+	
+var OptionType {
+	MOVE: {},
+	ADD: {},
+	APPEND: {},
+	DELETE: {}
+}

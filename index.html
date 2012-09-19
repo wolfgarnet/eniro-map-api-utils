@@ -7,6 +7,7 @@
 			var map;
 			var drawing = true;
 			var inserting = false;
+			var deleting = false;
 			function start() {
 				map = new PraqmaMap( "mymap", "normal", 63.35011, 10.31967, 63.46169, 10.50953 ); //63.35011, 10.31967, 63.46169, 10.50953
 				map.initializeMap();
@@ -48,6 +49,19 @@
 				}
 			}
 			
+			function toggleDeleting(e) {
+				
+				if( deleting ) {
+					e.innerHTML = "Enable deleting";
+					deleting = false;
+					map.disableDeleting();
+				} else {
+					e.innerHTML = "Disable deleting";
+					deleting = true;
+					map.enableDeleting();
+				}
+			}
+			
 			function empty(id) {
 				var e = document.getElementById(id);
 				e.value = "";
@@ -67,6 +81,7 @@
 		
 		<button onClick="disable(this);">Disable drawing</button>
 		<button onClick="toggleInserting(this);">Enable inserting</button>
+		<button onClick="toggleDeleting(this);">Enable deleting</button>
 		<button onClick="empty('text');">Empty text</button>
 		
 	</body>
