@@ -5,9 +5,12 @@
 		
 		<script type="text/javascript">
 			var map;
-			var drawing = true;
-			var inserting = false;
-			var deleting = false;
+			
+			var eAppend;
+			var eInsert;
+			var eMove
+			var eDelete
+			
 			function start() {
 				map = new PraqmaMap( "mymap", "normal", 63.35011, 10.31967, 63.46169, 10.50953 ); //63.35011, 10.31967, 63.46169, 10.50953
 				map.initializeMap();
@@ -21,46 +24,53 @@
 				map.makePolygon( points, '#ff0000', '#bb0000' );
 				
 				map.drawPolygon();
+				
+					
+				eAppend = document.getElementById( "append" );
+				eInsert = document.getElementById( "insert" );
+				eMove = document.getElementById( "move" );
+				eDelete = document.getElementById( "delete" );
 			}
 			
-			function disable(e) {
+			var option = OptionType.APPEND;
+
+			
+			function setAppend() {
+				map.setOption( OptionType.APPEND );
 				
-				if( drawing ) {
-					e.innerHTML = "ENABLE DRAWING";
-					drawing = false;
-					map.disableDrawing();
-				} else {
-					e.innerHTML = "DISABLE DRAWING";
-					drawing = true;
-					map.enableDrawing();
-				}
+				eAppend.innerHTML = "Disable appending";
+				eInsert.innerHTML = "Enable inserting";
+				eMove.innerHTML = "Enable moving";
+				eDelete.innerHTML = "Enable deleting";
 			}
 			
-			function toggleInserting(e) {
+			function setInsert() {
+				map.setOption( OptionType.INSERT );
 				
-				if( inserting ) {
-					e.innerHTML = "Enable inserting";
-					inserting = false;
-					map.disableInserting();
-				} else {
-					e.innerHTML = "Disable inserting";
-					inserting = true;
-					map.enableInserting();
-				}
+				eAppend.innerHTML = "Enable appending";
+				eInsert.innerHTML = "Disable inserting";
+				eMove.innerHTML = "Enable moving";
+				eDelete.innerHTML = "Enable deleting";
 			}
 			
-			function toggleDeleting(e) {
+			function setMove() {
+				map.setOption( OptionType.MOVE );
 				
-				if( deleting ) {
-					e.innerHTML = "Enable deleting";
-					deleting = false;
-					map.disableDeleting();
-				} else {
-					e.innerHTML = "Disable deleting";
-					deleting = true;
-					map.enableDeleting();
-				}
+				eAppend.innerHTML = "Enable appending";
+				eInsert.innerHTML = "Enable inserting";
+				eMove.innerHTML = "Disable moving";
+				eDelete.innerHTML = "Enable deleting";
 			}
+			
+			function setDelete() {
+				map.setOption( OptionType.DELETE );
+				
+				eAppend.innerHTML = "Enable appending";
+				eInsert.innerHTML = "Enable inserting";
+				eMove.innerHTML = "Enable moving";
+				eDelete.innerHTML = "Disable deleting";
+			}
+			
 			
 			function empty(id) {
 				var e = document.getElementById(id);
@@ -79,9 +89,11 @@
 			</tr>
 		</table>
 		
-		<button onClick="disable(this);">Disable drawing</button>
-		<button onClick="toggleInserting(this);">Enable inserting</button>
-		<button onClick="toggleDeleting(this);">Enable deleting</button>
+		<button id="append" onClick="setAppend();">Disable appending</button>
+		<button id="insert" onClick="setInsert();">Enable inserting</button>
+		<button id="move"onClick="setMove();">Enable moving</button>
+		<button id="delete"onClick="setDelete();">Enable deleting</button>
+		
 		<button onClick="empty('text');">Empty text</button>
 		
 	</body>

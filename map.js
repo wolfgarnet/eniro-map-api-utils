@@ -39,48 +39,6 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
       }
 	}
 	
-	this
-	
-	this.drawing = true;
-	
-	this.enableDrawing = function() {
-		this.drawing = true;
-	}
-	
-	this.disableDrawing = function() {
-		this.drawing = false;
-	}
-	
-	this.inserting = false;
-	
-	this.enableInserting = function() {
-		this.inserting = true;
-	}
-	
-	this.disableInserting = function() {
-		this.inserting = false;
-	}
-	
-	
-	this.deleting = false;
-	
-	this.enableDeleting = function() {
-		this.deleting = true;
-	}
-	
-	this.disableDeleting = function() {
-		this.deleting = false;
-	}
-	
-	this.moving = false;
-	
-	this.enableMoving = function() {
-		this.moving = true;
-	}
-	
-	this.disableMoving = function() {
-		this.moving = false;
-	}
 	
 	this.option = OptionType.APPEND;
 	
@@ -104,10 +62,9 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
           strokeWeight: 2
       });
 
-			var so = this;		
-			
+			var so = this;
       eniro.maps.event.addListener(this.map, 'click', function (evt) {
-				if( so.drawing ) {
+				if( so.option == OptionType.APPEND ) {
               var index = points.getLength();
               points.push(evt.latLng);
               
@@ -117,7 +74,7 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
       });
       
       eniro.maps.event.addListener(this.map, 'click', function (evt) {
-				if( so.inserting ) {
+				if( so.option == OptionType.INSERT ) {
               markers.push( so.insertDraggableMarker(points, evt.latLng, icon, markers) );
               printMarkers(markers);
 				}
@@ -175,20 +132,21 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
 
         // When marker is being dragged, the polygon should be updated.
         eniro.maps.event.addListener(marker, 'drag', function (evt) {
-        	if( !so.deleting ) {
+        	if( so.option == OptionType.MOVE ) {
             points.setAt(markers.getAt(thisid).pointid, marker.getPosition());
           }
         });
         
         var so = this;
         eniro.maps.event.addListener(marker, 'click', function (evt) {
-        	if( so.deleting ) {
+        	if( so.option == OptionType.DELETE ) {
             deleteMarker(thisid, markers, points);
           }
         });
         
         ddd.value = "[" + id + "]" + pos + "\n" + ddd.value;
         
+        /*
         var infoWindow = new eniro.maps.InfoWindow();
 				eniro.maps.event.addListener(marker, 'mouseover', function () {
 
@@ -204,7 +162,8 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
                   // open the window on the marker.
                   infoWindow.close(marker);
                   
-              });              
+              }); 
+              */             
 
 			return { marker: marker, id: thisid, pointid: id };
     };
@@ -249,18 +208,19 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
 				var so = this;
         // When marker is being dragged, the polygon should be updated.
         eniro.maps.event.addListener(marker, 'drag', function (evt) {
-        	if( !so.deleting ) {
+        	if( so.option == OptionType.MOVE ) {
             points.setAt(markers.getAt(thisid).pointid, marker.getPosition());
           }
         });
         
         
         eniro.maps.event.addListener(marker, 'click', function (evt) {
-        	if( so.deleting ) {
+        	if( so.option == OptionType.DELETE ) {
             deleteMarker(thisid, markers, points);
           }
         });
         
+        /*
         var infoWindow = new eniro.maps.InfoWindow();
 				eniro.maps.event.addListener(marker, 'mouseover', function () {
 
@@ -278,6 +238,7 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
                   infoWindow.close(marker);
                   
               });
+              */
         
         var ddd = document.getElementById( "text" );
         ddd.value = "[" + index + "]" + pos + "\n" + ddd.value;
@@ -358,9 +319,16 @@ function updateMarkers( markers, before, now ) {
 }
 
 function deleteMarker( markerId, markers, points ) {
+  var ddd = document.getElementById( "text" );
+  ddd.value = "Deleting marker@" + markerId + " of " + markers.getLength() + "\n" + ddd.value;
+	
 	var marker = markers.removeAt( markerId );
+	marker.marker.setDraggable( false );
 	points.removeAt( marker.pointid );
-	marker.setVisible( false );
+	marker.marker.setVisible( false );
+	
+	ddd.value = "Deleted marker@" + markerId + " of " + markers.getLength() + "\n" + ddd.value;
+	printMarkers( markers );
 }
 
 /**
@@ -382,14 +350,21 @@ function smallestSlope( n, p, p1, p2 ) {
 	//var a1 = angleTwoLines( s1_1, s1_2 );
 	//var a2 = angleTwoLines( s2_1, s2_2 );
 	
-	var a1 = angleTwoLines( s1_1, s1_2 );
-	var a2 = angleTwoLines( s2_1, s2_2 );
-	
-	if( ( n.getLat() > p.getLat() ) ) {
-	}
+	var a1 = angleTwoLines( s1_2, s1_1 );
+	var a2 = angleTwoLines( s2_2, s2_1 );
 	
   var ddd = document.getElementById( "text" );
   ddd.value = "Angle 1: " + a1 + ", Angle 2: " + a2 + "\n" + ddd.value;
+	
+	if( ( p1.getLng() > n.getLng() ) ) {
+		a1 *= -1;
+	}
+	
+	if( ( p2.getLng() > n.getLng() ) ) {
+		a2 *= -1;
+	}
+	
+	ddd.value = "Angle 1*: " + a1 + ", Angle 2*: " + a2 + "\n" + ddd.value;
 	
 	if( a1 < 0 && a2 < 0 ) {
 		if( a1 > a2 ) {
@@ -428,9 +403,9 @@ function angleTwoLines( m1, m2 ) {
 }
 	
 	
-var OptionType {
+var OptionType = {
 	MOVE: {},
-	ADD: {},
+	INSERT: {},
 	APPEND: {},
 	DELETE: {}
 }
