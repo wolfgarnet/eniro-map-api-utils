@@ -83,12 +83,14 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
               points.push(evt.latLng);
               
               markers.push( so.makeDraggableMarker(points,index, evt.latLng, icon, markers) );
+              printMarkers(markers);
 				}
       });
       
       eniro.maps.event.addListener(this.map, 'click', function (evt) {
 				if( so.inserting ) {
               markers.push( so.insertDraggableMarker(points, evt.latLng, icon, markers) );
+              printMarkers(markers);
 				}
       });
 	}
@@ -121,17 +123,23 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
         ddd.value = "1: " + i1 + "("+points.getAt( i1 )+")" + "\n" + ddd.value;
         ddd.value = "2: " + i2 + "("+points.getAt( i2 )+")" + "\n" + ddd.value;
         
+        /*
         i1l = distance( points.getAt( i1 ), pos );
         i2l = distance( points.getAt( i2 ), pos );
         
         ddd.value = "Distance 1: " + i1l + "\n" + ddd.value;
         ddd.value = "Distance 2: " + i2l + "\n" + ddd.value;
+        */
         
-        var id = i1;
-        if( i1l < i2l ) {
+        var smallest = smallestSlope( points.getAt( nearestId ), pos, points.getAt( i1 ), points.getAt( i2 ) );
+        
+        var id = i1+1;
+        if( smallest == 1 ) {
+        	ddd.value = "Smallest: " + i1 + "\n" + ddd.value;
         	this.wedgeAt( points, markers, i1+1, pos );
         } else {
-        	this.wedgeAt( points, markers, i2+1, pos );
+        	ddd.value = "Smallest: " + i2 + "\n" + ddd.value;
+        	this.wedgeAt( points, markers, i2, pos );
         	var id = i2;
         }
         
@@ -141,7 +149,24 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
             points.setAt(markers.getAt(thisid).pointid, marker.getPosition());
         });
         
-        ddd.value = "[" + id + "]" + pos + "\n" + ddd.value;        
+        ddd.value = "[" + id + "]" + pos + "\n" + ddd.value;
+        
+        var infoWindow = new eniro.maps.InfoWindow();
+				eniro.maps.event.addListener(marker, 'mouseover', function () {
+
+                  // set the content as either HTML or a DOM node.
+                  infoWindow.setContent( printMarker( markers.getAt(thisid) ) );
+
+                  // open the window on the marker.
+                  infoWindow.open(marker);
+                  
+              });  
+              
+				eniro.maps.event.addListener(marker, 'mouseout', function () {
+                  // open the window on the marker.
+                  infoWindow.close(marker);
+                  
+              });              
 
 			return { marker: marker, id: thisid, pointid: id };
     };
@@ -151,9 +176,13 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
     
     this.wedgeAt = function( points, markers, index, pos ) {
     	//points.push( points.getAt( pos ) );
+    	var ddd = document.getElementById( "text" );
+    	ddd.value = "Wedging at " + index + "\n" + ddd.value;
+    	
     	points.push( pos );
     	for( var i = ( points.getLength() - 1 ) ; i >= 0  ; i-- ) {
     		if( i == index ) {
+    			ddd.value = "Wedge found at " + i + "\n" + ddd.value;
     			points.setAt( i, pos );
     			break;
     		}
@@ -162,7 +191,9 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
     		points.setAt( i, b );
     		
     		/* Update */
+    		ddd.value = "Updating marker @ " + i + "\n" + ddd.value;
     		updateMarkers( markers, i-1, i );
+    		
     	}
     }
     
@@ -182,6 +213,23 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
             points.setAt(markers.getAt(thisid).pointid, marker.getPosition());
         });
         
+        var infoWindow = new eniro.maps.InfoWindow();
+				eniro.maps.event.addListener(marker, 'mouseover', function () {
+
+                  // set the content as either HTML or a DOM node.
+                  //infoWindow.setContent("Marker: " + markers.getAt(thisid).id + ", " + markers.getAt(thisid).pointid);
+                  infoWindow.setContent( printMarker( markers.getAt(thisid) ) );
+
+                  // open the window on the marker.
+                  infoWindow.open(marker);
+                  
+              }); 
+              
+				eniro.maps.event.addListener(marker, 'mouseout', function () {
+                  // open the window on the marker.
+                  infoWindow.close(marker);
+                  
+              });
         
         var ddd = document.getElementById( "text" );
         ddd.value = "[" + index + "]" + pos + "\n" + ddd.value;
@@ -200,6 +248,29 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
       return marker;
   };	
   
+}
+
+function printPoints( points ) {
+	var ddd = document.getElementById( "points" );
+	ddd.value = "Points(" + points.getLength() + ")\n-------------\n";
+	for( var i = 0 ; i < points.getLength() ; i++ ) {
+		ddd.value += "[" + i + "] " + points.getAt( i ) + "\n";
+	}
+}
+
+function printMarkers( markers ) {
+	var ddd = document.getElementById( "points" );
+	ddd.value = "Markers(" + markers.getLength() + ")\n-------------\n";
+	for( var i = 0 ; i < markers.getLength() ; i++ ) {
+		ddd.value += "[" + i + "] ";
+		ddd.value += "ID: " + markers.getAt( i ).id;
+		ddd.value += ", PID: " + markers.getAt( i ).pointid;
+		ddd.value += "\n";
+	}
+}
+
+function printMarker( marker ) {
+	return "Marker id: " + marker.id + "\nPoint id: " + marker.pointid;
 }
 
 function findNearest( points, p ) {
@@ -230,9 +301,46 @@ function distance( p1, p2 ) {
 function updateMarkers( markers, before, now ) {
 	for( var i = 0 ; i < markers.getLength() ; i++ ) {
 		if( markers.getAt( i ).pointid == before ) {
-			markers.getAt( i ).pointid == now;
+			var ddd = document.getElementById( "text" );
+    	ddd.value = "MARKER(" + i + ") UPDATE before " + before + ", now: " + now + "\n" + ddd.value;
+			markers.getAt( i ).pointid = now;
 			break;
 		}
 	}
+}
+
+/**
+ *  n : The nearest point found
+ *  p : The new point
+ *  p1: n-1
+ *  p2: n+1
+ * 
+ *  Returns
+ */
+function smallestSlope( n, p, p1, p2 ) {
+	var s1 = slope( n, p1 ); // Slope 
+	var s2 = slope( n, p2 );
+	var sn = slope( n, p );
+	
+	var a1 = angleTwoLines( sn, s1 );
+	var a2 = angleTwoLines( sn, s2 );
+	
+  var ddd = document.getElementById( "text" );
+  ddd.value = "Angle 1: " + a1 + ", Angle 2: " + a2 + "\n" + ddd.value;
+	
+	//alert( "a1: " + a1 + ", a2: " + a2 );
+	if( Math.abs( a1 ) < Math.abs( a2 ) ) {
+		return 1;
+	} else {
+		return 2;
+	}
+}
+
+function slope( p1, p2 ) {
+	return ( p2.getLat() - p1.getLat() ) / ( p2.getLng() - p1.getLng() );
+}
+
+function angleTwoLines( m1, m2 ) {
+	return (m1-m2) / (1+m1*m2);
 }
 	
