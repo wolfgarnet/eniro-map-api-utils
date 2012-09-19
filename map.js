@@ -376,23 +376,28 @@ function smallestSlope( n, p, p1, p2 ) {
 		
 	ddd.value = "Obtuse 1: " + o1 + "\n" + ddd.value;
 	ddd.value = "Obtuse 2: " + o2 + "\n" + ddd.value;
-		
-		if( a1 < 0 && a2 < 0 ) {
-			if( a1 > a2 ) {
+		if( ( o1 && o2 ) || ( !o1 && !o2 ) ) {
+			if( a1 < 0 && a2 < 0 ) {
+				if( a1 > a2 ) {
+					return 1;
+				} else {
+					return 2;
+				}
+			} else if( a1 < 0 && a2 >= 0 ) {
+				return 2;
+			} else if( a1 >= 0 && a2 < 0 ) {
 				return 1;
 			} else {
-				return 2;
+				if( a1 < a2 ) {
+					return 1;
+				} else {
+					return 2;
+				}
 			}
-		} else if( a1 < 0 && a2 >= 0 ) {
-			return 2;
-		} else if( a1 >= 0 && a2 < 0 ) {
+		} else if( o1 ) {
 			return 1;
 		} else {
-			if( a1 < a2 ) {
-				return 1;
-			} else {
-				return 2;
-			}
+			return 2;
 		}
 	} else if( cross1 ) {
 		return 2;
@@ -424,13 +429,21 @@ function side( point, p1, p2 ) {
 
 function obtuseTriangle( p1, n, p ) {
 	var a = distance( p1, p );
+	var b = distance( p1, n );
+	
+  var ddd = document.getElementById( "text" );
+	ddd.value = "p1-p: " + a + ", p1-n: " + b + "\n" + ddd.value;
+	
+	return b>a;
+}
+
+function obtuseTriangle2( p1, n, p ) {
+	var a = distance( p1, p );
 	var b = distance( n, p );
 	var c = distance( p1, n );
 	
 	return (a*a+b*b)<c*c;
 }
-
-
 	
 	
 var OptionType = {
