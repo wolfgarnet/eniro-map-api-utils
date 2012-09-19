@@ -1,0 +1,75 @@
+<html>
+	<head>
+		<script type="text/javascript" src="http://kartor.eniro.se/rs/eniro.js?partnerId=Samaritan&profile=dk"></script>
+		<script type="text/javascript" src="map.js"></script>
+		
+		<script type="text/javascript">
+			var map;
+			var drawing = true;
+			var inserting = false;
+			function start() {
+				map = new PraqmaMap( "mymap", "normal", 63.35011, 10.31967, 63.46169, 10.50953 ); //63.35011, 10.31967, 63.46169, 10.50953
+				map.initializeMap();
+				map.zoom();
+				var points = new eniro.maps.MapArray();
+				points.push( new eniro.maps.LatLng( 63.4, 10.4 ) );
+				points.push( new eniro.maps.LatLng( 63.45, 10.41 ) );
+				points.push( new eniro.maps.LatLng( 63.45, 10.45 ) );
+				points.push( new eniro.maps.LatLng( 63.42, 10.45 ) );
+				points.push( new eniro.maps.LatLng( 63.40, 10.43 ) );
+				map.makePolygon( points, '#ff0000', '#bb0000' );
+				
+				map.drawPolygon();
+			}
+			
+			function disable(e) {
+				
+				if( drawing ) {
+					e.innerHTML = "ENABLE DRAWING";
+					drawing = false;
+					map.disableDrawing();
+				} else {
+					e.innerHTML = "DISABLE DRAWING";
+					drawing = true;
+					map.enableDrawing();
+				}
+			}
+			
+			function toggleInserting(e) {
+				
+				if( inserting ) {
+					e.innerHTML = "Enable inserting";
+					inserting = false;
+					map.disableInserting();
+				} else {
+					e.innerHTML = "Disable inserting";
+					inserting = true;
+					map.enableInserting();
+				}
+			}
+			
+			function empty(id) {
+				var e = document.getElementById(id);
+				e.value = "";
+			}
+		</script>
+		
+	</head>
+	
+	<body onLoad="start();">		
+		<table>
+			<tr>
+				<td><div id="mymap" style="width:800px;height:500px"></div></td>
+				<td><textarea id="text" style="width:800px;height:500px""></textarea></td>
+			</tr>
+		</table>
+		
+		<button onClick="disable(this);">Disable drawing</button>
+		<button onClick="toggleInserting(this);">Enable inserting</button>
+		<button onClick="empty('text');">Empty text</button>
+		
+	</body>
+	
+
+	
+</html>
