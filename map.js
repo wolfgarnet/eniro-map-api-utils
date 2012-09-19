@@ -354,17 +354,16 @@ function smallestSlope( n, p, p1, p2 ) {
 	var a2 = angleTwoLines( s2_2, s2_1 );
 	
   var ddd = document.getElementById( "text" );
-  ddd.value = "Angle 1: " + a1 + ", Angle 2: " + a2 + "\n" + ddd.value;
-	
-	if( ( p1.getLng() > n.getLng() ) ) {
-		a1 *= -1;
-	}
-	
-	if( ( p2.getLng() > n.getLng() ) ) {
-		a2 *= -1;
-	}
-	
 	ddd.value = "Angle 1*: " + a1 + ", Angle 2*: " + a2 + "\n" + ddd.value;
+	
+	var side1a = side( n, p1, p );
+	var side1b = side( p2, p1, p );
+	
+	var side2a = side( n, p2, p );
+	var side2b = side( p1, p2, p );
+	
+	ddd.value = "Side 1a: " + side1a + ", side 1b: " + side1b + "\n" + ddd.value;
+	ddd.value = "Side 2a: " + side2a + ", side 2b: " + side2b + "\n" + ddd.value;
 	
 	if( a1 < 0 && a2 < 0 ) {
 		if( a1 > a2 ) {
@@ -400,6 +399,10 @@ function slope( p1, p2 ) {
 
 function angleTwoLines( m1, m2 ) {
 	return (m1-m2) / (1+m1*m2);
+}
+
+function side( point, p1, p2 ) {
+	return ( point.getLat() - p1.getLat() ) * ( p2.getLng() - p1.getLng() ) - ( point.getLng() - p1.getLng() ) * ( p2.getLat() - p1.getLat() );
 }
 	
 	
