@@ -61,6 +61,14 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
           exterior: points,
           strokeWeight: 2
       });
+      
+		var linePath = new eniro.maps.MapArray([pos, points.getAt(nearestId)]);
+		
+		var line = new eniro.maps.Polyline({
+                    map: this.map,
+                    path: linePath,
+                    strokeColor: "#ffaaaa"
+                });
 
 			var so = this;
       eniro.maps.event.addListener(this.map, 'click', function (evt) {
@@ -79,8 +87,19 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
               printThem(markers,points);
 				}
       });
+      
+      eniro.maps.event.addListener(this.map, 'mousemove', function (evt) {
+				if( so.option == OptionType.INSERT ) {
+             so.shortestLineToPoint(points, evt.latLng );
+				}
+      });
 	}
 	
+	this.shortestLineToPoint = function(points, pos ) {
+		var nearestId = findNearest( points, pos );
+		
+
+	}
 	
     this.insertDraggableMarker = function( points, pos, icon, markers ) {
 
