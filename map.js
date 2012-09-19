@@ -362,25 +362,42 @@ function smallestSlope( n, p, p1, p2 ) {
 	var side2a = side( n, p2, p );
 	var side2b = side( p1, p2, p );
 	
-	ddd.value = "Side 1a: " + side1a + ", side 1b: " + side1b + "\n" + ddd.value;
-	ddd.value = "Side 2a: " + side2a + ", side 2b: " + side2b + "\n" + ddd.value;
+	var cross1 = ( side1a > 0 ? ( side1b > 0 ? false : true ) : side1b > 0 ? true : false );
+	var cross2 = ( side2a > 0 ? ( side2b > 0 ? false : true ) : side2b > 0 ? true : false );
 	
-	if( a1 < 0 && a2 < 0 ) {
-		if( a1 > a2 ) {
+	ddd.value = "Side 1a: " + side1a + ", side 1b: " + side1b + " crossing=" + cross1 + "\n" + ddd.value;
+	ddd.value = "Side 2a: " + side2a + ", side 2b: " + side2b + " crossing=" + cross2 + "\n" + ddd.value;
+	
+	
+	
+	if( ( !cross1 && !cross2 ) || ( cross1 && cross2 ) ) {
+		var o1 = obtuseTriangle( p1, n, p );
+		var o2 = obtuseTriangle( p2, n, p );
+		
+	ddd.value = "Obtuse 1: " + o1 + "\n" + ddd.value;
+	ddd.value = "Obtuse 2: " + o2 + "\n" + ddd.value;
+		
+		if( a1 < 0 && a2 < 0 ) {
+			if( a1 > a2 ) {
+				return 1;
+			} else {
+				return 2;
+			}
+		} else if( a1 < 0 && a2 >= 0 ) {
+			return 2;
+		} else if( a1 >= 0 && a2 < 0 ) {
 			return 1;
 		} else {
-			return 2;
+			if( a1 < a2 ) {
+				return 1;
+			} else {
+				return 2;
+			}
 		}
-	} else if( a1 < 0 && a2 >= 0 ) {
+	} else if( cross1 ) {
 		return 2;
-	} else if( a1 >= 0 && a2 < 0 ) {
-		return 1;
 	} else {
-		if( a1 < a2 ) {
-			return 1;
-		} else {
-			return 2;
-		}
+		return 1;
 	}
 	
 	//alert( "a1: " + a1 + ", a2: " + a2 );
@@ -404,6 +421,16 @@ function angleTwoLines( m1, m2 ) {
 function side( point, p1, p2 ) {
 	return ( point.getLat() - p1.getLat() ) * ( p2.getLng() - p1.getLng() ) - ( point.getLng() - p1.getLng() ) * ( p2.getLat() - p1.getLat() );
 }
+
+function obtuseTriangle( p1, n, p ) {
+	var a = distance( p1, p );
+	var b = distance( n, p );
+	var c = distance( p1, n );
+	
+	return (a*a+b*b)<c*c;
+}
+
+
 	
 	
 var OptionType = {
