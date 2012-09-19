@@ -69,14 +69,14 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
               points.push(evt.latLng);
               
               markers.push( so.makeDraggableMarker(points,index, evt.latLng, icon, markers) );
-              printMarkers(markers);
+              printThem(markers,points);
 				}
       });
       
       eniro.maps.event.addListener(this.map, 'click', function (evt) {
 				if( so.option == OptionType.INSERT ) {
               markers.push( so.insertDraggableMarker(points, evt.latLng, icon, markers) );
-              printMarkers(markers);
+              printThem(markers,points);
 				}
       });
 	}
@@ -259,9 +259,17 @@ function PraqmaMap( containerID, mapType, BBleft, BBbottom, BBright, BBtop ) {
   
 }
 
+function printThem( markers, points ) {
+	var ddd = document.getElementById( "points" );
+	ddd.value = "";
+	printMarkers( markers );
+	ddd.value += "\n";
+	printPoints( points );
+}
+
 function printPoints( points ) {
 	var ddd = document.getElementById( "points" );
-	ddd.value = "Points(" + points.getLength() + ")\n-------------\n";
+	ddd.value += "Points(" + points.getLength() + ")\n-------------\n";
 	for( var i = 0 ; i < points.getLength() ; i++ ) {
 		ddd.value += "[" + i + "] " + points.getAt( i ) + "\n";
 	}
@@ -269,7 +277,7 @@ function printPoints( points ) {
 
 function printMarkers( markers ) {
 	var ddd = document.getElementById( "points" );
-	ddd.value = "Markers(" + markers.getLength() + ")\n-------------\n";
+	ddd.value += "Markers(" + markers.getLength() + ")\n-------------\n";
 	for( var i = 0 ; i < markers.getLength() ; i++ ) {
 		ddd.value += "[" + i + "] ";
 		ddd.value += "ID: " + markers.getAt( i ).id;
@@ -286,8 +294,14 @@ function findNearest( points, p ) {
 	var i = 0;
 	var bi = 0;
 	var shortest = 10000000.0;
+	
+	var ddd = document.getElementById( "text" );
+	ddd.value = "Finding nearest\n" + ddd.value;
+	
 	for( ; i < points.getLength() ; i++ ) {
 		var l = distance( p, points.getAt( i ) );
+		
+		ddd.value = "[" + i + "] " + l + " / " + shortest + "\n" + ddd.value;
 		
 		if( l < shortest ) {
 			shortest = l;
@@ -320,15 +334,24 @@ function updateMarkers( markers, before, now ) {
 
 function deleteMarker( markerId, markers, points ) {
   var ddd = document.getElementById( "text" );
-  ddd.value = "Deleting marker@" + markerId + " of " + markers.getLength() + "\n" + ddd.value;
-	
-	var marker = markers.removeAt( markerId );
+  
+  var marker = markers.getAt( markerId );
+  
+  ddd.value = "Deleting marker@" + markerId + " pointing to " + marker.pointid + " of " + (markers.getLength()+1) + "\n" + ddd.value;
+  
 	marker.marker.setDraggable( false );
 	points.removeAt( marker.pointid );
 	marker.marker.setVisible( false );
 	
-	ddd.value = "Deleted marker@" + markerId + " of " + markers.getLength() + "\n" + ddd.value;
-	printMarkers( markers );
+	/**/
+	for( var i = 0 ; i < markers.getLength() ; i++ ) {
+		if( markers.getAt( i ).pointid > marker.pointid ) {
+			markers.getAt( i ).pointid--;
+		}
+	}
+	
+	//ddd.value = "Deleted marker@" + markerId + " of " + markers.getLength() + "\n" + ddd.value;
+	printThem( markers, points );
 }
 
 /**
@@ -428,13 +451,13 @@ function side( point, p1, p2 ) {
 }
 
 function obtuseTriangle( p1, n, p ) {
-	var a = distance( p1, p );
-	var b = distance( p1, n );
+	var p1p = distance( p1, p );
+	var p1n = distance( p1, n );
 	
   var ddd = document.getElementById( "text" );
-	ddd.value = "p1-p: " + a + ", p1-n: " + b + "\n" + ddd.value;
+	ddd.value = "p1-p: " + p1p + ", p1-n: " + p1n + "\n" + ddd.value;
 	
-	return b>a;
+	return p1n>p1p;
 }
 
 function obtuseTriangle2( p1, n, p ) {
